@@ -25,6 +25,17 @@ let notes = [
 
 app.use(express.json())
 
+const requestLogger = (request, response, next) => {
+	console.log('Method:', request.method)
+	console.log('Path:  ', request.path)
+	console.log('Body:  ', request.body)
+	console.log('Code:', response.statusCode)
+	console.log('---')
+	next()
+}
+
+app.use(requestLogger)
+
 const generateId = () => {
 	const maxId = notes.length > 0
 	? Math.max(...notes.map(n => n.id))
@@ -56,7 +67,6 @@ app.get("/", (request, response) => {
 
 app.get("/api/notes", (request, response) => {
   response.json(notes);
-  console.log(response.statusCode, response.header);
 });
 
 app.get("/api/notes/:id", (request, response) => {
@@ -65,10 +75,8 @@ app.get("/api/notes/:id", (request, response) => {
 
 	if (note) {
 		response.json(note);
-		console.log(response.statusCode, response.header);
 	} else {
 		response.status(404).end()
-		console.log(response.statusCode, response.header);
 	}
 });
 
@@ -78,6 +86,12 @@ app.delete('/api/notes/:id', (request, response) => {
 
 	response.status(204).end()
 })
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
 
 const PORT = 3001;
 app.listen(PORT, () => {
