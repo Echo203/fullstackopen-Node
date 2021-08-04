@@ -1,5 +1,6 @@
 const { Router, request, response } = require("express");
 const express = require("express");
+const morgan = require("morgan")
 const app = express();
 
 let persons = [
@@ -26,6 +27,17 @@ let persons = [
 ]
 
 app.use(express.json())
+morgan.token("body", (req, res) => JSON.stringify(req.body))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+
+// const XD = (req, res, next) => {
+// 	console.log(req.body)
+// 	console.log(typeof req.body)
+// 	const x = JSON.stringify(req.body)
+// 	console.log(typeof x)
+// 	next()
+// }
+// app.use(XD)
 
 const generateId = () => {
 	return Math.floor(Math.random() * 10000)
