@@ -34,15 +34,6 @@ app.use(express.static('build'))
 morgan.token("body", (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
-// const XD = (req, res, next) => {
-// 	console.log(req.body)
-// 	console.log(typeof req.body)
-// 	const x = JSON.stringify(req.body)
-// 	console.log(typeof x)
-// 	next()
-// }
-// app.use(XD)
-
 const generateId = () => {
 	return Math.floor(Math.random() * 10000)
 }
