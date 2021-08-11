@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+var uniqueValidator = require('mongoose-unique-validator');
 
 const password = process.env.PORT;
 const url = process.env.MONGODB_URI
@@ -15,8 +16,16 @@ mongoose.connect(url, {
 })
 
 const phoneSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    minLength: 3,
+    required: true,
+    unique: true
+  },
+  number: {
+    type: String,
+    minLength: 8
+  },
 });
 
 phoneSchema.set('toJSON', {
@@ -26,5 +35,7 @@ phoneSchema.set('toJSON', {
     delete returnedObject.__v
   }
 })
+
+phoneSchema.plugin(uniqueValidator, { type: 'mongoose-unique-validator' })
 
 module.exports = mongoose.model("Phone", phoneSchema);

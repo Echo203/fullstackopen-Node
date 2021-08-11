@@ -15,7 +15,7 @@ app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body")
 );
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
   const body = req.body;
 
   if (!body.name || !body.number) {
@@ -27,9 +27,12 @@ app.post("/api/persons", (req, res) => {
     number: body.number,
   });
 
-  newPerson.save().then((savedPerson) => {
-    res.json(savedPerson);
-  });
+  newPerson
+    .save()
+    .then((savedPerson) => {
+      res.json(savedPerson);
+    })
+    .catch((err) => next(err));
 });
 
 //Fetch all entries
@@ -92,6 +95,9 @@ app.delete("/api/persons/:id", (req, res, next) => {
 //Error handling
 const errorHandler = (err, req, res, next) => {
   console.error(err.message);
+  if (err.name === "ValidationError") {
+    res.status(409).json({ err: "Unique name required" });
+  }
   next(err);
 };
 
