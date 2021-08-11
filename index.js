@@ -6,18 +6,14 @@ const cors = require("cors");
 const app = express();
 const Phone = require("./models/mongo");
 
+app.use(express.static("build"));
 app.use(express.json());
 app.use(cors());
-app.use(express.static("build"));
 
 morgan.token("body", (req, res) => JSON.stringify(req.body));
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body")
 );
-
-const generateId = () => {
-  return Math.floor(Math.random() * 10000);
-};
 
 app.post("/api/persons", (req, res) => {
   const body = req.body;
@@ -31,11 +27,12 @@ app.post("/api/persons", (req, res) => {
     number: body.number,
   });
 
-	newPerson.save().then(savedPerson => {
-		res.json(savedPerson)
-	})
+  newPerson.save().then((savedPerson) => {
+    res.json(savedPerson);
+  });
 });
 
+//Fetch all entries
 app.get("/api/persons", (req, res) => {
   Phone.find({}).then((numbers) => {
     res.json(numbers);
@@ -43,15 +40,20 @@ app.get("/api/persons", (req, res) => {
 });
 
 app.get("/info", (req, res) => {
-  res.send(
-    `Phonebook has total of ${persons.length} contacts, today is ${new Date()}`
-  );
+  Phone.find({}).then((numbers) => {
+    res.send(
+      `Phonebook has total of ${
+        numbers.length
+      } contacts, today is ${new Date()}`
+    );
+  });
 });
 
+//Fetch specific entry
 app.get("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
+  const id = req.params.id;
 
-  Phone.findById({ id })
+  Phone.findById(id)
     .then((person) => {
       res.json(person);
     })
@@ -60,12 +62,40 @@ app.get("/api/persons/:id", (req, res) => {
     });
 });
 
-app.delete("/api/persons/:id", (req, res) => {
+//Updating existing number
+app.put("/api/persons/:id", (req, res, next) => {
   const id = req.params.id;
-  persons = persons.filter((p) => p.id !== id);
+  const body = req.body;
 
-  res.status(204).end();
+  const updatedNumber = {
+    name: body.name,
+    number: body.number,
+  };
+
+  Phone.findByIdAndUpdate(id, updatedNumber, { new: true })
+    .then((updatedNumber) => {
+      res.json(updatedNumber);
+    })
+    .catch((err) => next(err));
 });
+
+//Deleting number
+app.delete("/api/persons/:id", (req, res, next) => {
+  const id = req.params.id;
+  Phone.findByIdAndDelete(id)
+    .then((deleteNote) => {
+      res.status(204).end();
+    })
+    .catch((err) => next(err));
+});
+
+//Error handling
+const errorHandler = (err, req, res, next) => {
+  console.error(err.message);
+  next(err);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
