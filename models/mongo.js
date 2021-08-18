@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-var uniqueValidator = require('mongoose-unique-validator');
+const mongoose = require('mongoose')
+var uniqueValidator = require('mongoose-unique-validator')
 
-const password = process.env.PORT;
+// eslint-disable-next-line no-undef
 const url = process.env.MONGODB_URI
 
 mongoose.connect(url, {
@@ -9,7 +9,7 @@ mongoose.connect(url, {
   useUnifiedTopology: true,
   useFindAndModify: false,
   useCreateIndex: true,
-}).then(res => {
+}).then(() => {
   console.log('Connection established to DB')
 }).catch(err => {
   console.log('Error occured' + err)
@@ -26,7 +26,7 @@ const phoneSchema = new mongoose.Schema({
     type: String,
     minLength: 8
   },
-});
+})
 
 phoneSchema.set('toJSON', {
   transform: (document, returnedObject) => {
@@ -38,4 +38,4 @@ phoneSchema.set('toJSON', {
 
 phoneSchema.plugin(uniqueValidator, { type: 'mongoose-unique-validator' })
 
-module.exports = mongoose.model("Phone", phoneSchema);
+module.exports = mongoose.model('Phone', phoneSchema)
